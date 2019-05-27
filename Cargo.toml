@@ -9,16 +9,35 @@ license = "MIT OR Apache-2.0"
 readme = "README.md"
 keywords = ["no-std", "embedded", "stm32l4"]
 
-[dependencies]
-cortex-m = "0.6.0"
-cortex-m-rt = "0.6.8"
-panic-halt = "0.2.0"
-
-
 [[bin]]
 name = "zissou"
 test = false
 bench = false
+
+[workspace]
+members = [
+  "stm32l4xx-hal",
+  "usb-device",
+  "stm32-rs/stm32l4",
+  "stm32l43x-usbd",
+]
+
+[dependencies]
+cortex-m = "0.5.8"
+cortex-m-rt = "0.6.8"
+panic-halt = "0.2.0"
+
+[dependencies.stm32l4xx-hal]
+path = "./stm32l4xx-hal"
+default-features = false
+features = ["rt", "stm32l4x2"]
+
+[dependencies.usb-device]
+path = "./usb-device"
+features = ["bigger-control-buffer"]
+
+[dependencies.stm32l43x-usbd]
+path = "./stm32l43x-usbd"
 
 [profile.release]
 codegen-units = 1

@@ -8,7 +8,7 @@ break DefaultHandler
 break HardFault                                            
 break rust_begin_unwind  
 
-reset halt
+# reset halt
 load
 # monitor verify
 # monitor reset
