@@ -43,3 +43,4 @@ path = "./stm32l43x-usbd"
 codegen-units = 1
 debug = true
 lto = true
+opt-level = "s"

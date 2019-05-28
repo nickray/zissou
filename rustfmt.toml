@@ -1,0 +1,6 @@
+ignore = [
+    "stm32l4xx-hal",
+    "stm32l43x-usbd",
+    "stm32-rs",
+    "usb-device",
+]

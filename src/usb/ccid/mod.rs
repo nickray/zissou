@@ -1,6 +1,5 @@
 /// Minimal and incomplete CDC-ACM implementation for the examples - this will eventually be a real
 /// crate!
-
 use core::cmp::min;
 use usb_device::class_prelude::*;
 use usb_device::Result;
@@ -20,9 +19,8 @@ const CCID_PROTOCOL_ICCD_B: u8 = 0x02;
 
 const CCID_FUNCTIONAL_INTERFACE: u8 = 0x21;
 
-
 pub struct SmartCard<'a, B: UsbBus> {
-    intf: InterfaceNumber,  // need this?
+    intf: InterfaceNumber, // need this?
     read_ep: EndpointOut<'a, B>,
     write_ep: EndpointIn<'a, B>,
     intr_ep: EndpointIn<'a, B>,
@@ -90,9 +88,11 @@ impl<B: UsbBus> UsbClass<B> for SmartCard<'_, B> {
             self.intf,
             USB_CLASS_CCID,
             USB_SUBCLASS_NONE,
-            CCID_PROTOCOL_CCID)?;
+            CCID_PROTOCOL_CCID,
+        )?;
 
         // TODO: wrap this in something nicer, just stealing Yubikey values here
+        #[rustfmt::skip]
         writer.write(
             CCID_FUNCTIONAL_INTERFACE,
             &[
@@ -130,7 +130,6 @@ impl<B: UsbBus> UsbClass<B> for SmartCard<'_, B> {
         writer.endpoint(&self.read_ep)?;
         writer.endpoint(&self.intr_ep)?;
 
-
         Ok(())
     }
 
@@ -140,5 +139,4 @@ impl<B: UsbBus> UsbClass<B> for SmartCard<'_, B> {
             self.write_ep.write(&[]).ok();
         }
     }
-
 }
