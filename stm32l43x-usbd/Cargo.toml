@@ -7,7 +7,7 @@ authors = ["Matti Virkkunen <mvirkkunen@gmail.com>"]
 [dependencies]
 bare-metal = "0.2.4"
 vcell = "0.1.0"
-cortex-m = "0.5.8"
+cortex-m = "0.6.0"
 cortex-m-semihosting = "0.3.3"
 
 [dependencies.stm32l4xx-hal]
