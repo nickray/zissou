@@ -1,0 +1,16 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/rust:latest
+
+    steps:
+      - checkout
+
+      - run:
+          name: Add embedded target
+          command: rustup target add thumbv7em-none-eabihf
+
+      - run:
+          name: Build the firmware
+          command: cargo build --release
