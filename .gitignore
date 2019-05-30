@@ -1,5 +1,7 @@
 /target
 **/*.rs.bk
+**/*.py[cod]
 Cargo.lock
 .gdb_history
 openocd.log
+/venv

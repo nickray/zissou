@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# BAUD=115200
+WHAT=/dev/zissouserial
+
+while true
+do
+    # stty -F ${WHAT} ${BAUD}  # cdc-acm impl doesn't handle this properly
+    cat ${WHAT} 2>/dev/null
+done

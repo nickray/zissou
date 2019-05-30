@@ -1,6 +1,9 @@
 #![no_std]
 #![no_main]
+#![feature(proc_macro_hygiene)]
 
+// use core::fmt;
+use ufmt::uwrite;
 extern crate panic_halt;
 use cortex_m_rt::entry;
 
@@ -16,8 +19,24 @@ mod usb;
 static GIT_DESCRIBE: &'static str = env!("GIT_DESCRIBE");
 static CCID_PRODUCT: &'static str = concat!("Zissou v", env!("GIT_DESCRIBE"));
 
+// macro_rules! uprint {
+//     ($serial:expr, $($arg:tt)*) => {
+//         fmt::write($serial, format_args!($($arg)*)).ok()
+//     };
+// }
+
+// macro_rules! uprintln {
+//     ($serial:expr, $fmt:expr) => {
+//         uprint!($serial, concat!($fmt, "\n"))
+//     };
+//     ($serial:expr, $fmt:expr, $($arg:tt)*) => {
+//         uprint!($serial, concat!($fmt, "\n"), $($arg)*)
+//     };
+// }
+
 #[entry]
 fn main() -> ! {
+    let cp = hal::cortex_m::Peripherals::take().unwrap();
     let dp = hal::device::Peripherals::take().unwrap();
 
     // let mut flash = dp.FLASH.constrain();
@@ -48,7 +67,7 @@ fn main() -> ! {
     );
 
     let mut smartcard = usb::ccid::SmartCard::new(&usb_bus);
-    // let mut serial = cdc_acm::SerialPort::new(&usb_bus);
+    let mut serial = usb::cdc_acm::SerialPort::new(&usb_bus);
 
     // vid/pid: http://pid.codes/1209/CC1D/
     let mut usb_dev = UsbDeviceBuilder::new(&usb_bus, UsbVidPid(0x1209, 0xcc1d))
@@ -57,27 +76,69 @@ fn main() -> ! {
         .serial_number("N/a")
         .build();
 
+    // "ensures that the host re-enumerates your device after a new program has been flashed."
     // usb_dev.force_reset().expect("reset failed");
 
     let mut buf = [0u8; 64];
+    let mut i: u32 = 0;
+
+    // let mut nvic = cp.NVIC;
+    // nvic.enable(hal::stm32::Interrupt::TIM7);
+    let mut timer = hal::timer::Timer::tim7(dp.TIM7, 1.hz(), clocks, &mut rcc.apb1r1);
+    // timer.start(1000.ms());
+
+    // timer.start(heartbeat_timeout);  // <- use a periodic one
     loop {
-        // if !usb_dev.poll(&mut [&mut smartcard, &mut serial]) {
-        if !usb_dev.poll(&mut [&mut smartcard]) {
+		// serial.write(b"heartbeat\n").ok();
+        // if i % 10240 == 0 {
+            // uprintln!(&mut serial, "hello {}1!", i);
+            // uprintln!(&mut serial, "{}", i);
+            // uwrite!(&mut serial, "hello {} hello\r\n", i).unwrap();
+        // if i % 2 == 0 {
+            // uwrite!(&mut serial, "hello! {}\n", i).unwrap();
+        // } else {
+            // uwrite!(&mut serial, "elloh\n").unwrap();
+        // }
+            // serial.write(&[]).ok();
+        // }
+        // i += 1;
+        if !usb_dev.poll(&mut [&mut smartcard, &mut serial]) {
             continue;
         }
 
-        // match serial.read(&mut buf) {
-        //     Ok(count) if count > 0 => {
-        //         // Echo back in upper case
-        //         for c in buf[0..count].iter_mut() {
-        //             if 0x61 <= *c && *c <= 0x7a {
-        //                 *c &= !0x20;
-        //             }
-        //         }
+        match serial.read(&mut buf) {
+            Ok(count) if count > 0 => {
+                // Echo back in upper case
+                for c in buf[0..count].iter_mut() {
+                    if 0x61 <= *c && *c <= 0x7a {
+                        *c &= !0x20;
+                    }
+                }
 
-        //         serial.write(&buf[0..count]).ok();
+                serial.write(&buf[0..count]).ok();
+                // uwrite!(&mut serial, "{}\n", i).unwrap();
+            },
+            _ => { },
+        }
+
+        // match timer.wait() {
+        //     Err(nb::Error::Other(e)) => {
+        //         // The error type specified by `timer.wait()` is `!`, which
+        //         // means no error can actually occur. The Rust compiler
+        //         // still forces us to provide this match arm, though.
+        //         unreachable!()
         //     },
-        //     _ => { },
+        //     // no timeout yet, try again
+        //     Err(nb::Error::WouldBlock) => continue,
+        //     // Ok(()) => return Err(Error::TimedOut),
+        //     Ok(()) => {
+        //         uwrite!(&mut serial, "hello! {}\n", i).unwrap();
+        //         // timer.start(1.hz());
+        //         i += 1;
+        //         // send heartbeat via VCOM
+        //         // set new heartbeat timer  <-- not necessary for Periodic timers
+        //     }
         // }
+
     }
 }

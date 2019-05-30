@@ -7,10 +7,19 @@ jobs:
     steps:
       - checkout
 
+      - restore_cache:
+          key: project-cache
+
       - run:
-          name: Add embedded target
-          command: rustup target add thumbv7em-none-eabihf
+          name: Prepare build
+          command: make rustup
 
       - run:
           name: Build the firmware
-          command: cargo build --release
+          command: make build
+
+      - save_cache:
+          key: project-cache
+          paths:
+            - "~/.cargo"
+            - "./target"

@@ -1,0 +1,2 @@
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1209", ATTRS{idProduct}=="cc1d", TAG+="uaccess", SYMLINK += "zissou"
+SUBSYSTEM=="tty", ATTRS{idVendor}=="1209", ATTRS{idProduct}=="cc1d", TAG+="uaccess", SYMLINK += "zissouserial"

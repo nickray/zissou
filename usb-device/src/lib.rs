@@ -192,7 +192,7 @@ pub mod class_prelude {
 }
 
 fn _ensure_sync() {
-    use crate::UsbDirection;
+    // use crate::UsbDirection;
     use crate::bus::{UsbBus, UsbBusAllocator, PollResult};
     use crate::class_prelude::*;
 
