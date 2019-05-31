@@ -16,6 +16,7 @@ build:
 	# rustup target add --toolchain stable $(TARGET)
 	# touch build.rs  # force reloading git-describe
 	cargo +$(TOOLCHAIN) build --release
+	# cargo +$(TOOLCHAIN) size --bin zissou --release
 
 clean:
 	cargo clean

@@ -24,7 +24,7 @@ fn main() -> ! {
     let p = cortex_m::Peripherals::take().unwrap();
     let dp = stm32::Peripherals::take().unwrap();
 
-    let mut flash = dp.FLASH.constrain();
+    // let mut flash = dp.FLASH.constrain();
     let mut rcc = dp.RCC.constrain();
 
     let clocks = rcc.cfgr
@@ -33,7 +33,7 @@ fn main() -> ! {
         .pclk1(24.mhz())
         // .pclk2(24.mhz())
         .hsi48(true)
-        .freeze(&mut flash.acr);
+        .freeze();
 
     let mut gpioa = dp.GPIOA.split(&mut rcc.ahb2);
 
@@ -53,7 +53,7 @@ fn main() -> ! {
         USB_SERIAL = Some(cdc_acm::SerialPort::new(USB_BUS.as_ref().unwrap()));
 
         let mut usb_dev = UsbDeviceBuilder::new(
-                &usb_bus,
+                USB_BUS.as_ref().unwrap(),
                 UsbVidPid(0x1209, 0x5070),
             )
             .manufacturer("Hardcore Bits")
