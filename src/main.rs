@@ -9,17 +9,15 @@ mod usb;
 
 use rtfm::app;
 use stm32l4xx_hal::prelude::*;
-
-use usb_device::prelude::*;
 use stm32l43x_usbd::UsbBus;
-use usb_device::bus;
 use ufmt::uwrite;
+use usb_device::bus;
+use usb_device::prelude::*;
 
 static CCID_PRODUCT: &'static str = concat!("Zissou v", env!("GIT_DESCRIBE"));
 
 #[app(device = stm32l4xx_hal::stm32)]
 const APP: () = {
-
     static mut USB_DEV: UsbDevice<'static, UsbBus> = ();
     static mut CCID: usb::ccid::SmartCard<'static, UsbBus> = ();
     static mut SERIAL: usb::cdc_acm::SerialPort<'static, UsbBus> = ();
@@ -32,8 +30,10 @@ const APP: () = {
 
         let clocks = rcc
             .cfgr
+            // .sysclk(8.mhz())
+            // .sysclk(80.mhz())
             .sysclk(48.mhz())
-            .pclk1(24.mhz())
+            // .pclk1(24.mhz())
             .hsi48(true)
             .freeze();
 
@@ -44,7 +44,6 @@ const APP: () = {
         // disable Vddusb power isolation
         let pwr = device.PWR.constrain(&mut rcc.apb1r1); // turns it on
         pwr.enable_usb();
-
 
         *USB_BUS = Some(UsbBus::usb_with_reset(
             device.USB,
@@ -58,14 +57,12 @@ const APP: () = {
         let ccid = usb::ccid::SmartCard::new(USB_BUS.as_ref().unwrap());
         let serial = usb::cdc_acm::SerialPort::new(USB_BUS.as_ref().unwrap());
 
-        let mut usb_dev = UsbDeviceBuilder::new(
-                USB_BUS.as_ref().unwrap(),
-                UsbVidPid(0x1209, 0xcc1d),
-            )
-            .manufacturer("HardcoreBits")
-            .product(CCID_PRODUCT)
-            .serial_number("∴ RTFM ∴ AEAD ∴")
-            .build();
+        let mut usb_dev =
+            UsbDeviceBuilder::new(USB_BUS.as_ref().unwrap(), UsbVidPid(0x1209, 0xcc1d))
+                .manufacturer("Hardcore Bits")
+                .product(CCID_PRODUCT)
+                .serial_number("∴ RTFM ∴ AEAD ∴")
+                .build();
 
         usb_dev.force_reset().expect("reset failed");
 
@@ -76,7 +73,11 @@ const APP: () = {
 
     #[interrupt(resources = [USB_DEV, CCID, SERIAL])]
     fn USB() {
-        usb_poll(&mut resources.USB_DEV, &mut resources.CCID, &mut resources.SERIAL);
+        usb_poll(
+            &mut resources.USB_DEV,
+            &mut resources.CCID,
+            &mut resources.SERIAL,
+        );
     }
 };
 
@@ -101,7 +102,7 @@ fn usb_poll<B: bus::UsbBus>(
             }
 
             serial.write(&buf[0..count]).ok();
-        },
-        _ => { },
+        }
+        _ => {}
     }
 }
