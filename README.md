@@ -4,7 +4,11 @@
 
 Alternative rustique smartstick firmware for Cortex-M4 and beyond.
 
-## Documentation
+## Information
 
-<https://www.notion.so/Zissou-2e49f61ab63240b6b35dbe65133447b9>
+Project site: <https://zissou.dev>  
+Newsletter: <https://buttondown.email/zissou>
 
+## Contact
+
+Feel free to send an email to [heyya@zissou.dev](mailto:heyya@zissou.dev) or reach out to @nickray on Keybase or IRC (freenode).
