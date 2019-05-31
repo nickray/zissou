@@ -30,6 +30,7 @@ panic-halt = "0.2.0"
 ufmt = "0.1.0-beta.4"
 ufmt-write = "0.1.0-beta.1"
 usbd-serial = { git = "https://github.com/nickray/usbd-serial" }
+cortex-m-rtfm = "0.4.0"
 
 [dependencies.stm32l4xx-hal]
 path = "./stm32l4xx-hal"
