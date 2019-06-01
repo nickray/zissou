@@ -1,0 +1,11 @@
+#!venv/bin/python
+
+import serial
+
+while True:
+    s = serial.Serial("/dev/zissouserial")
+    while True:
+        read = s.read_all()
+        if read:
+            print(read.decode(), end="")
+

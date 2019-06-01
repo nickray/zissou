@@ -1,0 +1,27 @@
+[build-system]
+requires = ["flit"]
+build-backend = "flit.buildapi"
+
+[tool.flit.metadata]
+module = "zissou"
+author = "Nicolas Stalder"
+author-email = "n@stalder.io"
+home-page = "https://github.com/nickray/zissou"
+requires-python = ">=3.6"
+requires = [
+  "click >= 7.0",
+  "pyserial",
+  "pyusb",
+]
+classifiers=[
+    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: Apache Software License",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+]
+
+[tool.flit.scripts]
+zissou = "zissou.cli:zissou_cli"

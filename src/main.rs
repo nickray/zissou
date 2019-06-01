@@ -7,7 +7,7 @@ extern crate panic_halt;
 
 mod usb;
 
-use rtfm::app;
+use rtfm::{app, Instant};
 use stm32l4xx_hal::prelude::*;
 use stm32l43x_usbd::UsbBus;
 use ufmt::uwrite;
@@ -16,12 +16,15 @@ use usb_device::prelude::*;
 
 static CCID_PRODUCT: &'static str = concat!("Zissou v", env!("GIT_DESCRIBE"));
 
+const PERIOD: u32 = 8_000_000;
+
 #[app(device = stm32l4xx_hal::stm32)]
 const APP: () = {
     static mut USB_DEV: UsbDevice<'static, UsbBus> = ();
     static mut CCID: usb::ccid::SmartCard<'static, UsbBus> = ();
     static mut SERIAL: usb::cdc_acm::SerialPort<'static, UsbBus> = ();
 
+    // #[init(schedule = [heartbeat])]
     #[init]
     fn init() {
         static mut USB_BUS: Option<bus::UsbBusAllocator<UsbBus>> = None;
@@ -64,11 +67,14 @@ const APP: () = {
                 .serial_number("∴ RTFM ∴ AEAD ∴")
                 .build();
 
-        usb_dev.force_reset().expect("reset failed");
+        // usb_dev.force_reset().expect("reset failed");
+
+        // schedule.heartbeat(Instant::now() + PERIOD.cycles()).unwrap();
 
         USB_DEV = usb_dev;
         CCID = ccid;
         SERIAL = serial;
+
     }
 
     #[interrupt(resources = [USB_DEV, CCID, SERIAL])]
@@ -78,6 +84,25 @@ const APP: () = {
             &mut resources.CCID,
             &mut resources.SERIAL,
         );
+    }
+
+    #[task(schedule = [heartbeat], resources = [SERIAL])]
+    // #[task(schedule = [heartbeat], resources = [SERIAL], priority = 4)]
+    // #[task(schedule = [heartbeat], priority = 4)]
+    fn heartbeat() {
+        let now = Instant::now();
+        // let serial: &mut usb::cdc_acm::SerialPort<'static, B> = &mut resources.SERIAL;
+        // resources.SERIAL.lock(|serial| {
+        //     // uwrite!(&mut serial, "heartbeat(scheduled = {:?}, now = {:?})", scheduled, now).unwrap();
+        // });
+        // uwrite!(&mut serial, "heartbeat(scheduled = {:?}, now = {:?})", scheduled, now).unwrap();
+        // uwrite!(&mut serial, "hello {} hello\r\n", i).unwrap();
+
+        schedule.heartbeat(scheduled + PERIOD.cycles()).unwrap();
+    }
+
+    extern "C" {
+        fn UART4();
     }
 };
 

@@ -21,6 +21,10 @@ build:
 clean:
 	cargo clean
 
+docs:
+	cargo doc # --open
+	echo "Visit target/thumbv7em-none-eabihf/doc/settings.html"
+
 # clippy:
 # 	rustup component add clippy
 # 	cargo clippy
