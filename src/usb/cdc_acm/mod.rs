@@ -172,15 +172,17 @@ impl<B: UsbBus> UsbClass<B> for SerialPort<'_, B> {
     }
 
     fn control_out(&mut self, xfer: ControlOut<B>) {
-        let req = *xfer.request();
+        let req = xfer.request();
 
         if req.request_type == control::RequestType::Class
             && req.recipient == control::Recipient::Interface
         {
             return match req.request {
+                // see the usbd-serial crate on how to do this
                 REQ_SET_LINE_CODING => xfer.accept().unwrap(),
                 REQ_SET_CONTROL_LINE_STATE => xfer.accept().unwrap(),
-                _ => xfer.reject().unwrap(),
+                // was reject -- but this was wrong
+                _ => (),
             };
         }
     }
