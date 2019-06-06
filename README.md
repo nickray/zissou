@@ -1,8 +1,16 @@
-[![CircleCI](https://img.shields.io/circleci/build/github/nickray/zissou/master.svg)](https://circleci.com/gh/nickray/zissou/tree/master)
-
 # Zissou
 
-Smartstick Firmware in Rust.
+∴ PIV-like smartstick firmware in Rust ∴ 
+
+[![Build Status][build-image]][build-link]
+![Apache 2.0 OR MIT licensed][license-image]
+[![IRC #zissou][IRC-image]][IRC-link]
+
+[build-image]: https://img.shields.io/circleci/build/github/nickray/zissou/master.svg
+[build-link]: https://circleci.com/gh/nickray/zissou/tree/master
+[license-image]: https://img.shields.io/badge/license-Apache2.0%2FMIT-blue.svg
+[IRC-image]: https://img.shields.io/badge/IRC-%23zissou-orange.svg
+[IRC-link]: https://webchat.freenode.net/?channels=#zissou
 
 - Home: <https://zissou.dev>
 - Code: <https://code.zissou.dev>
