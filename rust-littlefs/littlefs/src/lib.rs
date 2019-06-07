@@ -15,16 +15,16 @@
 #[macro_use]
 extern crate bitflags;
 
-const READ_SIZE: usize = 256;
-const PROG_SIZE: usize = 256;
-const BLOCK_SIZE: usize = 4096;
+const READ_SIZE: usize = 8;
+const PROG_SIZE: usize = 8;
+const BLOCK_SIZE: usize = 2048;
 const BLOCK_COUNT: usize = 32;
 const BLOCK_CYCLES: usize = 0; // set to >0 for wear leveling
-const LOOKAHEAD_SIZE: usize = 128;
+const LOOKAHEAD_SIZE: usize = 128; // no idea...
 // must be multiple of READ/PROG, factor of BLOCK sizes
 // NB: `test_validate_big_file` fails for CACHE_SIZE = 512
 // Q: RamStorage limitation?
-const CACHE_SIZE: usize = 256;
+const CACHE_SIZE: usize = 8;
 
 use core::{cmp, fmt, mem, ptr, slice};
 use littlefs_sys as lfs;
