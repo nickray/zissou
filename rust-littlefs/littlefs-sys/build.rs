@@ -15,8 +15,14 @@ use std::path::PathBuf;
 fn main() {
     cc::Build::new()
         .flag("-std=c11")
+        .flag("-DLFS_NO_MALLOC")
+        .flag("-DLFS_NO_ASSERT")
+        .flag("-DLFS_NO_DEBUG")
+        .flag("-DLFS_NO_WARN")
+        .flag("-DLFS_NO_ERROR")
         .file("littlefs/lfs.c")
         .file("littlefs/lfs_util.c")
+        .file("littlefs/string.c")
         .compile("lfs-sys");
 
     let bindings = bindgen::Builder::default()
