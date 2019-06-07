@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/ARMmbed/littlefs.git
+	branch = v2.0.4
+	commit = ef77195a640db9fa0dda16fc982373b9427fae1a
+	parent = 8cfec98a11b8560935275a386cbe094c83b307ad
+	method = merge
+	cmdver = 0.4.0

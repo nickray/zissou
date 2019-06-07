@@ -1,0 +1,16 @@
+[package]
+name = "littlefs-sys"
+description = "Build of upstream LittleFS with bindings"
+version = "0.2.0"
+authors = ["Brandon Edens <brandonedens@gmail.com>"]
+edition = "2018"
+license = "BSD-3-Clause"
+categories = ["embedded", "filesystem", "no-std"]
+repository = "https://github.com/brandonedens/rust-littlefs"
+
+[dependencies]
+cty = "0.1.5"
+
+[build-dependencies]
+bindgen = "0.43.1"
+cc = "1.0.25"
