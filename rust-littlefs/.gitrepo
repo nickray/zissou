@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:nickray/rust-littlefs.git
 	branch = master
-	commit = 7ef83567f6dd2341aa7031d375d80dbb22fc527f
-	parent = 1605af8fc4e6e32fb9699fc9a5e9faee25e8b064
+	commit = 303c3d1da62b6c74c01ed3e80199335cf8acfd20
+	parent = 53edaf3ba6937adb09f2aaa8a3a6a2743a113aac
 	method = merge
 	cmdver = 0.4.0
