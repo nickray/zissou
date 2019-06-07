@@ -20,6 +20,8 @@ members = [
   "usb-device",
   "stm32-rs/stm32l4",
   "stm32l43x-usbd",
+  "rust-littlefs/littlefs",
+  "rust-littlefs/littlefs-sys",
 ]
 
 [dependencies]
@@ -31,11 +33,14 @@ ufmt = "0.1.0-beta.4"
 ufmt-write = "0.1.0-beta.1"
 usbd-serial = { git = "https://github.com/nickray/usbd-serial" }
 cortex-m-rtfm = { version = "0.4.0", features = ["timer-queue"] }
+cortex-m-semihosting = "0.3.3"
+byteorder = { version = "1.3.1", default-features = false }
+# libc = { version = "0.2.58", default-features = false }
 
 [dependencies.stm32l4xx-hal]
 path = "./stm32l4xx-hal"
 default-features = false
-features = ["rt", "stm32l4x2"]
+features = ["rt", "stm32l4x2", "extra-traits"]
 
 [dependencies.usb-device]
 path = "./usb-device"
@@ -43,6 +48,9 @@ features = ["bigger-control-buffer"]
 
 [dependencies.stm32l43x-usbd]
 path = "./stm32l43x-usbd"
+
+[dependencies.littlefs]
+path = "./rust-littlefs/littlefs"
 
 [profile.release]
 codegen-units = 1

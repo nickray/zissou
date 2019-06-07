@@ -13,4 +13,4 @@ load
 # monitor verify
 # monitor reset
 # quit
-#continue
+continue

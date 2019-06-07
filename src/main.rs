@@ -5,24 +5,84 @@
 
 extern crate panic_halt;
 
+mod gordon;
 mod usb;
 
 use rtfm::{app, Instant};
 use stm32l4xx_hal::prelude::*;
+use stm32l4xx_hal as hal;
 use stm32l43x_usbd::UsbBus;
 use ufmt::uwrite;
 use usb_device::bus;
 use usb_device::prelude::*;
+use littlefs;
+use littlefs::FileOpenFlags;
+use byteorder::ByteOrder;
+
+use cortex_m_semihosting::hprintln;
 
 static CCID_PRODUCT: &'static str = concat!("Zissou v", env!("GIT_DESCRIBE"));
 
 const PERIOD: u32 = 8_000_000;
+
+fn experiment_with_lfs(lfs: &mut littlefs::LittleFs<gordon::Gordon>) {
+    hprintln!("Attempting to mount LFS...").unwrap();
+    if let Err(_) = lfs.mount() {
+        hprintln!("...failed, attempting to format").unwrap();
+        lfs.format().unwrap();
+        hprintln!("...success formatting, now mounting again").unwrap();
+        lfs.mount().unwrap();
+        hprintln!("...success mounting").unwrap();
+    } else {
+        hprintln!("...done mounting").unwrap();
+    }
+
+    let mut boot_count: u32 = 0;
+    let mut file = Default::default();
+    hprintln!("Opening `boot_count` file...").unwrap();
+    lfs.file_open(
+        &mut file,
+        "/boot_count",
+        FileOpenFlags::RDWR | FileOpenFlags::CREAT,
+    ).unwrap();
+    hprintln!("...yay!").unwrap();
+
+    // pub fn file_read(&mut self, file: &mut File, buf: &mut [u8]) -> Result<usize, FsError> {
+    let mut read_buf = [0u8; 4];
+    match lfs.file_read(&mut file, &mut read_buf) {
+        Ok(4) => {
+            hprintln!("Read 4 bytes").unwrap();
+            boot_count = byteorder::NativeEndian::read_u32(&read_buf);
+        }
+        Ok(n) => {
+            hprintln!("Read {} bytes", n).unwrap();
+        },
+        _ => {
+            // panic?
+            hprintln!("Failed to read!").unwrap();
+        },
+    }
+
+    hprintln!("boot_count = {}", boot_count).unwrap();
+
+    boot_count += 1;
+    lfs.file_rewind(&mut file);
+    let mut write_buf = [0u8; 4];
+    byteorder::NativeEndian::write_u32(
+        &mut write_buf,
+        boot_count,
+    );
+    lfs.file_write(&mut file, &write_buf);
+    lfs.file_close(file);
+}
 
 #[app(device = stm32l4xx_hal::stm32)]
 const APP: () = {
     static mut USB_DEV: UsbDevice<'static, UsbBus> = ();
     static mut CCID: usb::ccid::SmartCard<'static, UsbBus> = ();
     static mut SERIAL: usb::cdc_acm::SerialPort<'static, UsbBus> = ();
+    // static mut GORDON: gordon::Gordon = ();
+    static mut LFS: littlefs::LittleFs<gordon::Gordon> = ();
 
     // #[init(schedule = [heartbeat])]
     #[init]
@@ -71,9 +131,15 @@ const APP: () = {
 
         // schedule.heartbeat(Instant::now() + PERIOD.cycles()).unwrap();
 
+        let mut flash = hal::flash::Flash::new(device.FLASH);
+        let storage = gordon::Gordon::new(flash);
+        let mut lfs = littlefs::LittleFs::new(storage);
+
+        experiment_with_lfs(&mut lfs);
         USB_DEV = usb_dev;
         CCID = ccid;
         SERIAL = serial;
+        LFS = lfs;
 
     }
 
