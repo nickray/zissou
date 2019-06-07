@@ -15,11 +15,14 @@ use std::path::PathBuf;
 fn main() {
     cc::Build::new()
         .flag("-std=c11")
-        .flag("-DLFS_NO_MALLOC")
-        .flag("-DLFS_NO_ASSERT")
-        .flag("-DLFS_NO_DEBUG")
-        .flag("-DLFS_NO_WARN")
-        .flag("-DLFS_NO_ERROR")
+        // .flag("-Os") // doesn't seem to do anything?
+        .opt_level_str("s") // maybe implied by release profile?
+        .include("/usr/include/newlib")  // might fix the CI build :/
+        .define("LFS_NO_MALLOC", None)
+        .define("LFS_NO_ASSERT", None)
+        .define("LFS_NO_DEBUG", None)
+        .define("LFS_NO_WARN", None)
+        .define("LFS_NO_ERROR", None)
         .file("littlefs/lfs.c")
         .file("littlefs/lfs_util.c")
         .file("littlefs/string.c")
