@@ -537,6 +537,13 @@ impl<T: Storage> LittleFs<T> {
         lfs_to_fserror(res)
     }
 
+    /// Finds the current size of the filesystem.
+    pub fn fs_size(&mut self) -> Result<usize, FsError> {
+        let res = unsafe { lfs::lfs_fs_size(&mut self.lfs) };
+        // lfs_to_fserror(res)
+        lfs_to_usize_fserror(res)
+    }
+
     /// Create instance of lfs configuration.
     fn create_lfs_config(&mut self) -> lfs::lfs_config {
         lfs::lfs_config {
