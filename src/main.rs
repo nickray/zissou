@@ -3,7 +3,8 @@
 #![allow(non_snake_case)]
 #![feature(proc_macro_hygiene)]
 
-extern crate panic_halt;
+// extern crate panic_halt;
+extern crate panic_semihosting;
 
 mod gordon;
 mod usb;
@@ -37,12 +38,33 @@ fn experiment_with_lfs(lfs: &mut littlefs::LittleFs<gordon::Gordon>) {
         hprintln!("...done mounting").unwrap();
     }
 
+    let mut random_file = Default::default();
+    lfs.file_open(
+        &mut random_file,
+        "random_file",
+        FileOpenFlags::RDWR | FileOpenFlags::CREAT,
+    ).unwrap();
+    lfs.file_write(&mut random_file, &[0u8, 1, 2, 3, 4]).unwrap();
+    lfs.file_sync(random_file).unwrap();
+
+    let mut random_file = Default::default();
+    lfs.file_open(
+        &mut random_file,
+        "random_file",
+        FileOpenFlags::RDWR | FileOpenFlags::CREAT,
+    ).unwrap();
+    let mut buf = [0u8; 12];
+    let n = lfs.file_read(&mut random_file, &mut buf).unwrap();
+    hprintln!("buf = {:?}", &buf[..n]).unwrap();
+
+    let fs_size = lfs.fs_size().unwrap();
+    hprintln!("Size of FS: {} blocks", fs_size).unwrap();
     let mut boot_count: u32 = 0;
     let mut file = Default::default();
     hprintln!("Opening `boot_count` file...").unwrap();
     lfs.file_open(
         &mut file,
-        "/boot_count",
+        "boot_count",
         FileOpenFlags::RDWR | FileOpenFlags::CREAT,
     ).unwrap();
     hprintln!("...yay!").unwrap();
@@ -66,14 +88,14 @@ fn experiment_with_lfs(lfs: &mut littlefs::LittleFs<gordon::Gordon>) {
     hprintln!("boot_count = {}", boot_count).unwrap();
 
     boot_count += 1;
-    lfs.file_rewind(&mut file);
+    lfs.file_rewind(&mut file).unwrap();
     let mut write_buf = [0u8; 4];
     byteorder::NativeEndian::write_u32(
         &mut write_buf,
         boot_count,
     );
-    lfs.file_write(&mut file, &write_buf);
-    lfs.file_close(file);
+    lfs.file_write(&mut file, &write_buf).unwrap();
+    lfs.file_close(file).unwrap();
 }
 
 #[app(device = stm32l4xx_hal::stm32)]
@@ -99,6 +121,13 @@ const APP: () = {
             // .pclk1(24.mhz())
             .hsi48(true)
             .freeze();
+
+        let flash = hal::flash::Flash::new(device.FLASH);
+        let storage = gordon::Gordon::new(flash);
+        let mut lfs = littlefs::LittleFs::new(storage);
+        experiment_with_lfs(&mut lfs);
+
+
 
         let mut gpioa = device.GPIOA.split(&mut rcc.ahb2);
 
@@ -131,11 +160,6 @@ const APP: () = {
 
         // schedule.heartbeat(Instant::now() + PERIOD.cycles()).unwrap();
 
-        let mut flash = hal::flash::Flash::new(device.FLASH);
-        let storage = gordon::Gordon::new(flash);
-        let mut lfs = littlefs::LittleFs::new(storage);
-
-        experiment_with_lfs(&mut lfs);
         USB_DEV = usb_dev;
         CCID = ccid;
         SERIAL = serial;

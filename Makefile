@@ -47,9 +47,15 @@ openocd:
 hil:
 	pytest --quiet
 
+pcscd:
+	sudo LIBCCID_ifdLogLevel=0x000F pcscd --foreground --debug --apdu --color
+
 # NB: needs separate OpenOCD running
-run: build
+run:
 	cargo +$(TOOLCHAIN) run --release
+
+run-debug:
+	cargo +$(TOOLCHAIN) run
 
 rustup:
 	rustup install $(TOOLCHAIN)
@@ -67,13 +73,17 @@ udev:
 	sudo udevadm control --reload-rules
 	sudo udevadm trigger
 
-venv:
+_create-venv:
 	python3 -m venv venv
-	venv/bin/pip install -U pip
-	venv/bin/pip install -U -r requirements.txt
+
+venv: _create-venv update-venv
+	# python3 -m venv venv
+	# venv/bin/pip install -U pip
+	# venv/bin/pip install -U -r requirements.txt
 
 # re-run if dev or runtime dependencies change,
 # or when adding new scripts
 update-venv: venv
 	venv/bin/pip install -U pip
 	venv/bin/pip install -U -r requirements.txt
+	venv/bin/pip install -U -r dev-requirements.txt

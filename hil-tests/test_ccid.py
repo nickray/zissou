@@ -1,5 +1,6 @@
 import struct
 
+import psutil
 import pytest
 import usb.core
 
@@ -9,6 +10,8 @@ pid = 0xCC1D
 CCID_CLASS = 0x0B
 CCID_SUBCLASS = 0x00
 CCID_PROTOCOL_0 = 0x00
+
+CONFIG = {"vid": 0x1209, "pid": 0xCC1D, "class": CCID_CLASS, "subclass": CCID_SUBCLASS}
 
 from usb.util import (
     find_descriptor,
@@ -32,8 +35,8 @@ class CCID:
 
         self.intf = intf = find_descriptor(
             cfg,
-            bInterfaceClass=CCID_CLASS,
-            bInterfaceSubClass=CCID_SUBCLASS,
+            bInterfaceClass=CONFIG["class"],
+            bInterfaceSubClass=CONFIG["subclass"],
             # bInterfaceProtocol=CCID_PROTOCOL_0,
         )
         if intf is None:
@@ -105,7 +108,7 @@ class CCID:
 def ccid():
     """The CCID interface to Zissou."""
 
-    dev = usb.core.find(idVendor=vid, idProduct=pid)
+    dev = usb.core.find(idVendor=CONFIG["vid"], idProduct=CONFIG["pid"])
     assert dev is not None
 
     yield CCID(dev)
@@ -114,10 +117,18 @@ def ccid():
     pass
 
 
+def test_no_pcscd():
+    pcscds = [p for p in psutil.process_iter() if p.name() == "pcscd"]
+    assert not pcscds, "Running `pcscd` process interferes with tests."
+
+
 def test_connect(ccid):
     """Check access (udev."""
 
-    assert None == ccid.power_off()
-    atr = ccid.power_on()
+    power_off = ccid.power_off()[2]
+    assert 0x81 == power_off[0]
 
-    assert atr == b"123"
+    atr = ccid.power_on()
+    assert 0x80 == atr[0]
+    l = atr[1]
+    assert [0x3B, 0x8A, 0x80, 0x01] == list(atr[10 : 10 + l])
