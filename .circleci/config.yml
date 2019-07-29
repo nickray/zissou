@@ -21,6 +21,11 @@ jobs:
           command: sudo apt-get update && sudo apt-get install gcc-arm-none-eabi libclang-dev libnewlib-dev
 
       - run:
+          # NB: need cdefs.h for littlefs
+          name: Install cdefs.h
+          command: sudo apt-get update && sudo apt-get install libc6-dev
+
+      - run:
           name: Build the firmware
           command: make build
 
