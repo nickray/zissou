@@ -12,7 +12,7 @@ mod usb;
 use rtfm::{app, Instant};
 use stm32l4xx_hal::prelude::*;
 use stm32l4xx_hal as hal;
-use stm32l43x_usbd::UsbBus;
+use stm32_usbd::{UsbBus, UsbBusType};
 use ufmt::uwrite;
 use usb_device::bus;
 use usb_device::prelude::*;
@@ -100,16 +100,16 @@ fn experiment_with_lfs(lfs: &mut littlefs::LittleFs<gordon::Gordon>) {
 
 #[app(device = stm32l4xx_hal::stm32)]
 const APP: () = {
-    static mut USB_DEV: UsbDevice<'static, UsbBus> = ();
-    static mut CCID: usb::ccid::SmartCard<'static, UsbBus> = ();
-    static mut SERIAL: usb::cdc_acm::SerialPort<'static, UsbBus> = ();
+    static mut USB_DEV: UsbDevice<'static, UsbBusType> = ();
+    static mut CCID: usb::ccid::SmartCard<'static, UsbBusType> = ();
+    static mut SERIAL: usb::cdc_acm::SerialPort<'static, UsbBusType> = ();
     // static mut GORDON: gordon::Gordon = ();
     static mut LFS: littlefs::LittleFs<gordon::Gordon> = ();
 
     // #[init(schedule = [heartbeat])]
     #[init]
     fn init() {
-        static mut USB_BUS: Option<bus::UsbBusAllocator<UsbBus>> = None;
+        static mut USB_BUS: Option<bus::UsbBusAllocator<UsbBusType>> = None;
 
         let mut rcc = device.RCC.constrain();
 
@@ -131,32 +131,24 @@ const APP: () = {
 
         let mut gpioa = device.GPIOA.split(&mut rcc.ahb2);
 
+        let usb_dm = gpioa.pa11.into_af10(&mut gpioa.moder, &mut gpioa.afrh);
         let usb_dp = gpioa.pa12.into_af10(&mut gpioa.moder, &mut gpioa.afrh);
 
         // disable Vddusb power isolation
         let pwr = device.PWR.constrain(&mut rcc.apb1r1); // turns it on
         pwr.enable_usb();
 
-        *USB_BUS = Some(UsbBus::usb_with_reset(
-            device.USB,
-            &mut rcc.apb1r1,
-            &clocks,
-            &mut gpioa.moder,
-            &mut gpioa.otyper,
-            usb_dp,
-        ));
+        *USB_BUS = Some(UsbBus::new(device.USB, (usb_dm, usb_dp)));
 
         let ccid = usb::ccid::SmartCard::new(USB_BUS.as_ref().unwrap());
         let serial = usb::cdc_acm::SerialPort::new(USB_BUS.as_ref().unwrap());
 
-        let mut usb_dev =
+        let usb_dev =
             UsbDeviceBuilder::new(USB_BUS.as_ref().unwrap(), UsbVidPid(0x1209, 0xcc1d))
                 .manufacturer("Hardcore Bits")
                 .product(CCID_PRODUCT)
                 .serial_number("∴ RTFM ∴ AEAD ∴")
                 .build();
-
-        // usb_dev.force_reset().expect("reset failed");
 
         // schedule.heartbeat(Instant::now() + PERIOD.cycles()).unwrap();
 
