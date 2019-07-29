@@ -12,6 +12,6 @@ repository = "https://github.com/brandonedens/rust-littlefs"
 cty = "0.2.0"
 
 [build-dependencies]
-bindgen = "0.51.0"
-# bindgen = "0.43.1"
+# bindgen = "0.51.0"
+bindgen = "0.43.1"
 cc = "1.0.25"
