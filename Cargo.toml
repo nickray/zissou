@@ -17,9 +17,7 @@ bench = false
 [workspace]
 members = [
   "stm32l4xx-hal",
-  "usb-device",
   "stm32-rs/stm32l4",
-  "stm32l43x-usbd",
   "rust-littlefs/littlefs",
   "rust-littlefs/littlefs-sys",
 ]
