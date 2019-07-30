@@ -141,22 +141,22 @@ macro_rules! hal {
                 apb.rstr().modify(|_, w| w.$timXrst().clear_bit());
 
                 if PINS::C1 {
-                    tim.ccmr1_output
+                    tim.ccmr1_output()
                         .modify(|_, w| unsafe { w.oc1pe().set_bit().oc1m().bits(6) });
                 }
 
                 if PINS::C2 {
-                    tim.ccmr1_output
+                    tim.ccmr1_output()
                         .modify(|_, w| unsafe { w.oc2pe().set_bit().oc2m().bits(6) });
                 }
 
                 if PINS::C3 {
-                    tim.ccmr2_output
+                    tim.ccmr2_output()
                         .modify(|_, w| unsafe { w.oc3pe().set_bit().oc3m().bits(6) });
                 }
 
                 if PINS::C4 {
-                    tim.ccmr2_output
+                    tim.ccmr2_output()
                         .modify(|_, w| unsafe { w.oc4pe().set_bit().oc4m().bits(6) });
                 }
                 let clk = clocks.pclk1().0;
